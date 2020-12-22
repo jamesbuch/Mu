@@ -12,12 +12,17 @@ stat
  : assignment
  | if_stat
  | while_stat
+ | unless_stat
  | log
  | OTHER {System.err.println("unknown char: " + $OTHER.text);}
  ;
 
 assignment
  : ID ASSIGN expr SCOL
+ ;
+
+unless_stat
+ : UNLESS expr stat_block
  ;
 
 if_stat
@@ -42,7 +47,7 @@ log
  ;
 
 expr
- : expr POW<assoc=right> expr           #powExpr
+ : <assoc=right>expr POW expr           #powExpr
  | MINUS expr                           #unaryMinusExpr
  | NOT expr                             #notExpr
  | expr op=(MULT | DIV | MOD) expr      #multiplicationExpr
@@ -60,6 +65,7 @@ atom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
  | STRING         #stringAtom
+ | DOLLAR STRING  #dollarStringAtom
  | NIL            #nilAtom
  ;
 
@@ -90,6 +96,7 @@ TRUE : 'true';
 FALSE : 'false';
 NIL : 'nil';
 IF : 'if';
+UNLESS: 'unless';
 ELSE : 'else';
 WHILE : 'while';
 LOG : 'log';
@@ -117,6 +124,10 @@ COMMENT
 
 SPACE
  : [ \t\r\n] -> skip
+ ;
+
+DOLLAR
+ : '$'
  ;
 
 OTHER
