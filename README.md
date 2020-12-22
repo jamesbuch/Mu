@@ -49,6 +49,8 @@ mvn -q exec:java
 which will print the following to your console:
 
 ```
+foo = foo bar = 1.0 baz = true
+m is true
 9.0 -> odd
 8.0 -> even
 7.0 -> odd
