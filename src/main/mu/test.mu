@@ -1,6 +1,12 @@
 n = 9;
 m = true;
 
+foo = "foo";
+bar = 1;
+baz = true;
+
+log $"foo = {foo} bar = {bar} baz = {baz}";
+
 unless !m log $ "m is {m}";
 
 while n > 0 {
