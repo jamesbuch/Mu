@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class EvalVisitor extends MuBaseVisitor<Value> {
 
     // used to compare floating point numbers
@@ -38,6 +41,35 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         String str = ctx.getText();
         // strip quotes
         str = str.substring(1, str.length() - 1).replace("\"\"", "\"");
+        return new Value(str);
+    }
+
+    @Override
+    public Value visitDollarStringAtom(MuParser.DollarStringAtomContext ctx) {
+        
+        String str = ctx.getText();
+        
+        // strip leading dollar sign
+        str = str.replace("$", "");
+
+        // strip quotes
+        str = str.substring(1, str.length() - 1).replace("\"\"", "\"");
+        
+        // Do string interpolation here
+        // If we find {var} then replace that with the string representation
+        // of that variable
+        Pattern r = Pattern.compile("(\\{([a-zA-Z_][a-zA-Z0-9_]*)\\})");
+        Matcher m = r.matcher(str);
+        
+        while (m.find()) {
+            // group 0 the whole string, then group 1 {varName} then group 2 varName
+            String varName = m.group(2);
+            String varValue = memory.get(varName).asString();
+            if (varValue == null) varValue = "NULL";
+            str = str.replace(m.group(1), varValue);
+            m = r.matcher(str);
+        }
+        
         return new Value(str);
     }
 
@@ -201,6 +233,19 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
 
         if(!evaluatedBlock && ctx.stat_block() != null) {
             // evaluate the else-stat_block (if present == not null)
+            this.visit(ctx.stat_block());
+        }
+
+        return Value.VOID;
+    }
+
+    // unless override
+    @Override
+    public Value visitUnless_stat(MuParser.Unless_statContext ctx) {
+
+        Value evaluated = this.visit(ctx.expr());
+
+        if (!evaluated.asBoolean()) {
             this.visit(ctx.stat_block());
         }
 
