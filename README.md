@@ -11,31 +11,35 @@ Mu has string interpolation with the dollar sign prepended to a string, for
 example `log $"Variable is {varName}";`
 
 ```
-n = 9;
-m = true;
+n = 9
+m = true
 
-foo = "foo";
-bar = 1;
-baz = true;
+foo = "foo"
+bar = 1
+baz = true
 
-log $"foo = {foo} bar = {bar} baz = {baz}";
+log $"foo = {foo} bar = {bar} baz = {baz}"
 
-unless !m log $ "m is {m}";
+unless !m log $ "m is {m}"
 
 while n > 0 {
 
   # expressions can be surrounded by parenthesis, of course
   if (n % 2 == 0) {
-    log $ "{n} -> even";
+    log $ "{n} -> even"
   }
   else {
-    log $ "{n} -> odd";
+    log $ "{n} -> odd"
   }
 
-  n = n - 1;
+  n = n - 1
 }
 
-unless n == 0 log "n is not 0";
+unless n == 0 log "n is not 0"
+
+for j = 1 to 10
+  log $"Hello, World j = {j}"
+next
 ```
 
 do:
