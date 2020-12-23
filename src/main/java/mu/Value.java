@@ -4,9 +4,13 @@ public class Value {
 
     public static Value VOID = new Value(new Object());
 
-    final Object value;
+    Object value;
     
     public Value(Object value) {
+        this.value = value;
+    }
+
+    public void updateValue(Object value) {
         this.value = value;
     }
 
@@ -16,6 +20,11 @@ public class Value {
 
     public Double asDouble() {
         return (Double)value;
+    }
+
+    public Integer asInteger() {
+        Double d = (Double)value;
+        return d.intValue();
     }
 
     public String asString() {

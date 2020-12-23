@@ -13,12 +13,13 @@ stat
  | if_stat
  | while_stat
  | unless_stat
+ | for_stat
  | log
  | OTHER {System.err.println("unknown char: " + $OTHER.text);}
  ;
 
 assignment
- : ID ASSIGN expr SCOL
+ : ID ASSIGN expr
  ;
 
 unless_stat
@@ -42,8 +43,12 @@ while_stat
  : WHILE expr stat_block
  ;
 
+for_stat
+ : FOR ID ASSIGN arith_atom TO arith_atom stat_block NEXT
+ ;
+
 log
- : LOG expr SCOL
+ : LOG expr
  ;
 
 expr
@@ -61,12 +66,16 @@ expr
 
 atom
  : OPAR expr CPAR #parExpr
- | (INT | FLOAT)  #numberAtom
+ | arith_atom     #arithAtom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
  | STRING         #stringAtom
  | DOLLAR STRING  #dollarStringAtom
  | NIL            #nilAtom
+ ;
+
+arith_atom
+ : (INT | FLOAT)  #numberAtom
  ;
 
 OR : '||';
@@ -100,6 +109,9 @@ UNLESS: 'unless';
 ELSE : 'else';
 WHILE : 'while';
 LOG : 'log';
+FOR : 'for';
+TO : 'to';
+NEXT : 'next';
 
 ID
  : [a-zA-Z_] [a-zA-Z_0-9]*

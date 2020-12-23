@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.tree.TreeNode;
+
 public class EvalVisitor extends MuBaseVisitor<Value> {
 
     // used to compare floating point numbers
@@ -75,6 +77,11 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
 
     @Override
     public Value visitNumberAtom(MuParser.NumberAtomContext ctx) {
+        return new Value(Double.valueOf(ctx.getText()));
+    }
+
+    @Override
+    public Value visitArithAtom(MuParser.ArithAtomContext ctx) {
         return new Value(Double.valueOf(ctx.getText()));
     }
 
@@ -265,6 +272,38 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
 
             // evaluate the expression
             value = this.visit(ctx.expr());
+        }
+
+        return Value.VOID;
+    }
+
+    // for override
+    @Override
+    public Value visitFor_stat(MuParser.For_statContext ctx) {
+
+        // with multiple arith atoms, they are returned by index
+        Value initial = this.visit(ctx.arith_atom(0));
+        Value terminate = this.visit(ctx.arith_atom(1));
+
+        // id part
+        String id = ctx.ID().getText();
+        
+        // Basic checks
+        // Can be int or float, use int
+        int start_value = initial.asInteger();
+        int end_value = terminate.asInteger();
+
+        if (end_value <= start_value) {
+            System.err.println("FOR statement never executes: end condition smaller or equal to start condition");
+            return Value.VOID;
+        }
+        
+        memory.put(id, initial);
+        while (start_value <= end_value) {
+            this.visit(ctx.stat_block());
+            start_value++;
+            initial.updateValue(start_value);
+            memory.put(id, initial);
         }
 
         return Value.VOID;
