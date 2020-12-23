@@ -53,6 +53,7 @@ mvn -q exec:java
 which will print the following to your console:
 
 ```
+parsing: src/main/mu/test.mu
 foo = foo bar = 1.0 baz = true
 m is true
 9.0 -> odd
@@ -64,6 +65,16 @@ m is true
 3.0 -> odd
 2.0 -> even
 1.0 -> odd
+Hello, World j = 1.0
+Hello, World j = 2
+Hello, World j = 3
+Hello, World j = 4
+Hello, World j = 5
+Hello, World j = 6
+Hello, World j = 7
+Hello, World j = 8
+Hello, World j = 9
+Hello, World j = 10
 ```
 
 Also see [this stackoverflow Q&A](http://stackoverflow.com/questions/15610183/if-else-statements-in-antlr-using-listeners).
