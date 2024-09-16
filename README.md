@@ -6,10 +6,10 @@ and decision and control structures, has variable scoping, and functions. Variab
 can have the types integer, float, string, boolean and for functions, these
 types as well as void.
 
-To run [the demo script](https://github.com/bkiers/Mu/blob/master/src/main/mu/test.mu):
-
 Mu has string interpolation with the dollar sign prepended to a string, for
 example `println($"Variable is #{varName}");`
+
+To run [the demo script](https://github.com/bkiers/Mu/blob/master/src/main/mu/test.mu):
 
 ```
 a: integer = 9
