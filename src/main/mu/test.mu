@@ -1,29 +1,55 @@
-n = 9
-m = true
+a: integer = 9
 
-foo = "foo"
-bar = 1
-baz = true
+println($"Global scope a = #{a}")
 
-log $"foo = {foo} bar = {bar} baz = {baz}"
+func myfunction(i: integer, j: integer): void
+  println("This is a function")
 
-unless !m log $ "m is {m}"
+  a: integer = 10
+  b: integer = 50
+  c: integer = 0
 
-while n > 0 {
+  c = a + b + i * 2 + j * 3
+  println($"The #{a} + #{b} + #{i} * 2 + #{j} * 3 = #{c}")
+end
 
-  # expressions can be surrounded by parenthesis, of course
-  if (n % 2 == 0) {
-    log $ "{n} -> even"
-  }
-  else {
-    log $ "{n} -> odd"
-  }
+println($"Global scope a = #{a}")
 
-  n = n - 1
-}
+foo: string = "foobarbazqux"
+bar: integer = 1
+baz: boolean = true
 
-unless n == 0 log "n is not 0"
+println($"a = #{a} foo = #{foo} bar = #{bar} baz = #{baz}")
+
+myfunction(1000, 50000)
+
+j: integer = 0
 
 for j = 1 to 10
-  log $"Hello, World j = {j}"
+  println($"Hello, World j = #{j}")
 next
+
+b: integer = 0
+while b < 5
+  b = b + 1
+  println($"The value of b is #{b}")
+end
+
+func f(a: integer, b: integer): integer
+  println("In function f")
+  return a + b
+end
+
+rc: integer = f(10, 20)
+
+println($"Sum from f() = #{rc}")
+
+rc = f(100, 1000)
+println($"Sum from f() = #{rc}")
+
+if "mail@server.com" =~ "[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}" then
+  println("The regex matches")
+else
+  println("I expected it to match but it did not")
+end if
+

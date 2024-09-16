@@ -1,147 +1,140 @@
 grammar Mu;
 
-parse
- : block EOF
- ;
+// Top-level program: at least one function_def or non-empty block
+program: (function_def | nonEmptyBlock)+ EOF;
 
-block
- : stat*
- ;
+// Block of statements that can be empty
+block: stat*;
 
-stat
- : assignment
- | if_stat
- | while_stat
- | unless_stat
- | for_stat
- | log
- | OTHER {System.err.println("unknown char: " + $OTHER.text);}
- ;
+// Non-empty block (used only at the top level)
+nonEmptyBlock: stat+;
 
-assignment
- : ID ASSIGN expr
- ;
+stat:
+	assignment
+	| if_stat
+	| while_stat
+	| for_stat
+	| print_func
+	| read_func
+	| function_def
+	| expr_stat
+	| unless_expr
+	| OTHER {System.err.println("unknown char: " + $OTHER.text);};
 
-unless_stat
- : UNLESS expr stat_block
- ;
+read_func: ID ASSIGN READLN OPAR CPAR;
 
-if_stat
- : IF condition_block (ELSE IF condition_block)* (ELSE stat_block)?
- ;
+assignment:
+	ID COLON TYPE ASSIGN expr	# assignmentWithType
+	| ID ASSIGN expr			# simpleAssignment;
 
-condition_block
- : expr stat_block
- ;
+if_stat:
+	IF expr THEN stat_block (ELSE IF expr THEN stat_block)* (
+		ELSE stat_block
+	)? END IF;
 
-stat_block
- : OBRACE block CBRACE
- | stat
- ;
+stat_block: block | stat;
 
-while_stat
- : WHILE expr stat_block
- ;
+while_stat: WHILE expr stat_block END;
 
-for_stat
- : FOR ID ASSIGN arith_atom TO arith_atom stat_block NEXT
- ;
+for_stat:
+	FOR ID ASSIGN arith_atom TO (arith_atom | ID) stat_block NEXT;
 
-log
- : LOG expr
- ;
+unless_expr: 'do' stat_block 'unless' expr # unlessExpr;
 
-expr
- : <assoc=right>expr POW expr           #powExpr
- | MINUS expr                           #unaryMinusExpr
- | NOT expr                             #notExpr
- | expr op=(MULT | DIV | MOD) expr      #multiplicationExpr
- | expr op=(PLUS | MINUS) expr          #additiveExpr
- | expr op=(LTEQ | GTEQ | LT | GT) expr #relationalExpr
- | expr op=(EQ | NEQ) expr              #equalityExpr
- | expr AND expr                        #andExpr
- | expr OR expr                         #orExpr
- | atom                                 #atomExpr
- ;
+print_func: PRINTLN OPAR expr CPAR | PRINT OPAR expr CPAR;
 
-atom
- : OPAR expr CPAR #parExpr
- | arith_atom     #arithAtom
- | (TRUE | FALSE) #booleanAtom
- | ID             #idAtom
- | STRING         #stringAtom
- | DOLLAR STRING  #dollarStringAtom
- | NIL            #nilAtom
- ;
+function_def:
+	'func' ID '(' parameter_list ')' (':' TYPE)? stat_block return_stmt? 'end';
 
-arith_atom
- : (INT | FLOAT)  #numberAtom
- ;
+return_stmt: 'return' expr;
 
-OR : '||';
-AND : '&&';
-EQ : '==';
-NEQ : '!=';
-GT : '>';
-LT : '<';
-GTEQ : '>=';
-LTEQ : '<=';
-PLUS : '+';
-MINUS : '-';
-MULT : '*';
-DIV : '/';
-MOD : '%';
-POW : '^';
-NOT : '!';
+parameter_list: (ID ':' TYPE (',' ID ':' TYPE)*)?;
 
-SCOL : ';';
-ASSIGN : '=';
-OPAR : '(';
-CPAR : ')';
-OBRACE : '{';
-CBRACE : '}';
+function_call: ID '(' expr_list? ')';
 
-TRUE : 'true';
-FALSE : 'false';
-NIL : 'nil';
-IF : 'if';
-UNLESS: 'unless';
-ELSE : 'else';
-WHILE : 'while';
-LOG : 'log';
-FOR : 'for';
-TO : 'to';
-NEXT : 'next';
+expr_list: expr (',' expr)*;
 
-ID
- : [a-zA-Z_] [a-zA-Z_0-9]*
- ;
+expr:
+	<assoc = right> expr POW expr					# powExpr
+	| <assoc = right> MINUS expr					# unaryMinusExpr
+	| <assoc = right> NOT expr						# notExpr
+	| expr op = (MULT | DIV | MOD) expr				# multiplicationExpr
+	| expr op = (PLUS | MINUS) expr					# additiveExpr
+	| expr op = (LTEQ | GTEQ | LT | GT) expr		# relationalExpr
+	| expr op = (EQ | NEQ) expr						# equalityExpr
+	| expr AND expr									# andExpr
+	| expr OR expr									# orExpr
+	| STRING (REGEX_MATCH | REGEX_NOT_MATCH) STRING	# regexExpr
+	| atom											# atomExpr;
 
-INT
- : [0-9]+
- ;
+atom:
+	OPAR expr CPAR		# parExpr
+	| arith_atom		# arithAtom
+	| (TRUE | FALSE)	# booleanAtom
+	| ID				# idAtom
+	| STRING			# stringAtom
+	| DOLLAR STRING		# dollarStringAtom
+	| NIL				# nilAtom
+	| function_call		# funcCallAtom; // | ID '(' expr_list? ')'  #funcCallAtom
 
-FLOAT
- : [0-9]+ '.' [0-9]* 
- | '.' [0-9]+
- ;
+expr_stat: expr;
 
-STRING
- : '"' (~["\r\n] | '""')* '"'
- ;
+arith_atom: integer_atom | float_atom;
 
-COMMENT
- : '#' ~[\r\n]* -> skip
- ;
+integer_atom: INT # integerAtom;
 
-SPACE
- : [ \t\r\n] -> skip
- ;
+float_atom: FLOAT # floatAtom;
 
-DOLLAR
- : '$'
- ;
+OR: '||' | 'or';
+AND: '&&' | 'and';
+EQ: '==' | 'eq';
+NEQ: '!=' | 'ne';
+GT: '>';
+LT: '<';
+GTEQ: '>=';
+LTEQ: '<=';
+PLUS: '+';
+MINUS: '-';
+MULT: '*';
+DIV: '/';
+MOD: '%';
+POW: '^';
+REGEX_MATCH: '=~';
+REGEX_NOT_MATCH: '!~';
+NOT: '!' | 'not';
+COLON: ':';
+ASSIGN: '=';
+OPAR: '(';
+CPAR: ')';
+TRUE: 'true';
+FALSE: 'false';
+NIL: 'nil';
+IF: 'if';
+THEN: 'then';
+ELSE: 'else';
+WHILE: 'while';
+FOR: 'for';
+TO: 'to';
+END: 'end';
+NEXT: 'next';
+PRINTLN: 'println';
+PRINT: 'print';
+READLN: 'readln';
 
-OTHER
- : . 
- ;
+TYPE: 'integer' | 'float' | 'boolean' | 'string' | 'void';
+
+ID: [a-zA-Z_] [a-zA-Z_0-9]*;
+
+INT: [0-9]+;
+
+FLOAT: [0-9]+ '.' [0-9]* | '.' [0-9]+;
+
+STRING: '"' (~["\r\n] | '""')* '"';
+
+COMMENT: '#' ~[\r\n]* -> skip;
+
+SPACE: [ \t\r\n] -> skip;
+
+DOLLAR: '$';
+
+OTHER: .;

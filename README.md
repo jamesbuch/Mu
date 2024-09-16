@@ -1,45 +1,71 @@
 Mu
 ==
 
-A small expression parser, using ANTLR 4. It supports most basic operators
-and `for`-, `while`- and `log`- (print) statements. It is just a basic
-demonstration of how to use the `-visitor` functionality of ANTLR 4.
+A small interpreted language, using ANTLR 4. It supports most basic operators
+and decision and control structures, has variable scoping, and functions. Variables
+can have the types integer, float, string, boolean and for functions, these
+types as well as void.
 
 To run [the demo script](https://github.com/bkiers/Mu/blob/master/src/main/mu/test.mu):
 
 Mu has string interpolation with the dollar sign prepended to a string, for
-example `log $"Variable is {varName}";`
+example `println($"Variable is #{varName}");`
 
 ```
-n = 9
-m = true
+a: integer = 9
 
-foo = "foo"
-bar = 1
-baz = true
+println($"Global scope a = #{a}")
 
-log $"foo = {foo} bar = {bar} baz = {baz}"
+func myfunction(i: integer, j: integer): void
+  println("This is a function")
 
-unless !m log $ "m is {m}"
+  a: integer = 10
+  b: integer = 50
+  c: integer = 0
 
-while n > 0 {
+  c = a + b + i * 2 + j * 3
+  println($"The #{a} + #{b} + #{i} * 2 + #{j} * 3 = #{c}")
+end
 
-  # expressions can be surrounded by parenthesis, of course
-  if (n % 2 == 0) {
-    log $ "{n} -> even"
-  }
-  else {
-    log $ "{n} -> odd"
-  }
+println($"Global scope a = #{a}")
 
-  n = n - 1
-}
+foo: string = "foobarbazqux"
+bar: integer = 1
+baz: boolean = true
 
-unless n == 0 log "n is not 0"
+println($"a = #{a} foo = #{foo} bar = #{bar} baz = #{baz}")
+
+myfunction(1000, 50000)
+
+j: integer = 0
 
 for j = 1 to 10
-  log $"Hello, World j = {j}"
+  println($"Hello, World j = #{j}")
 next
+
+b: integer = 0
+while b < 5
+  b = b + 1
+  println($"The value of b is #{b}")
+end
+
+func f(a: integer, b: integer): integer
+  println("In function f")
+  return a + b
+end
+
+rc: integer = f(10, 20)
+
+println($"Sum from f() = #{rc}")
+
+rc = f(100, 1000)
+println($"Sum from f() = #{rc}")
+
+if "mail@server.com" =~ "[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}" then
+  println("The regex matches")
+else
+  println("I expected it to match but it did not")
+end if
 ```
 
 do:
@@ -54,18 +80,12 @@ which will print the following to your console:
 
 ```
 parsing: src/main/mu/test.mu
-foo = foo bar = 1.0 baz = true
-m is true
-9.0 -> odd
-8.0 -> even
-7.0 -> odd
-6.0 -> even
-5.0 -> odd
-4.0 -> even
-3.0 -> odd
-2.0 -> even
-1.0 -> odd
-Hello, World j = 1.0
+Global scope a = 9
+Global scope a = 9
+a = 9 foo = foobarbazqux bar = 1 baz = true
+This is a function
+The 10 + 50 + 1000 * 2 + 50000 * 3 = 152060
+Hello, World j = 1
 Hello, World j = 2
 Hello, World j = 3
 Hello, World j = 4
@@ -75,6 +95,16 @@ Hello, World j = 7
 Hello, World j = 8
 Hello, World j = 9
 Hello, World j = 10
+The value of b is 1
+The value of b is 2
+The value of b is 3
+The value of b is 4
+The value of b is 5
+In function f
+Sum from f() = 30
+In function f
+Sum from f() = 1100
+The regex matches
 ```
 
 Also see [this stackoverflow Q&A](http://stackoverflow.com/questions/15610183/if-else-statements-in-antlr-using-listeners).
