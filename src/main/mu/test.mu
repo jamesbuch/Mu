@@ -83,20 +83,38 @@ println($"Lowercase name: #{nameLower} and active? #{active}")
 
 paddedName: string = "   " + name + "   "
 trimmedName: string = trim(paddedName)
-println($"Trimmed name '#{trimmedName}' has length #{len(trimmedName)}")
-println($"Name starts with 'J'? #{startswith(trimmedName, "J")}")
-println($"Name ends with 's'? #{endswith(trimmedName, "s")}")
-println($"Name contains 'am'? #{contains(trimmedName, "am")}")
+lenTrimmedName: integer = len(trimmedName)
 
-println($"sqrt(81) = #{sqrt(81)}")
-println($"round(measurement) = #{round(measurement)}")
-println($"floor(measurement) = #{floor(measurement)}")
-println($"ceil(measurement) = #{ceil(measurement)}")
-println($"min(x, y) = #{min(x, y)}")
-println($"max(x, measurement) = #{max(x, measurement)}")
+println($"Trimmed name '#{trimmedName}' has length #{lenTrimmedName}")
+
+startsWithJ: boolean = startswith(trimmedName, "J")
+endsWithS: boolean = endswith(trimmedName, "s")
+containsAm: boolean = contains(trimmedName, "am")
+
+println($"Name starts with 'J'? #{startsWithJ}")
+println($"Name ends with 's'? #{endsWithS}")
+println($"Name contains 'am'? #{containsAm}")
+
+sqrtEightyOne: float = sqrt(81)
+println($"sqrt(81) = #{sqrtEightyOne}")
+
+roundMeasurement: float = round(measurement)
+floorMeasurement: float = floor(measurement)
+ceilMeasurement: float = ceil(measurement)
+println($"round(measurement) = #{roundMeasurement}")
+println($"floor(measurement) = #{floorMeasurement}")
+println($"ceil(measurement) = #{ceilMeasurement}")
+
+minXY: integer = min(x, y)
+maxMeasurement: integer = max(x, measurement)
+println($"min(x, y) = #{minXY}")
+println($"max(x, measurement) = #{maxMeasurement}")
 
 nickname: string = nil
 displayName: string = coalesce(nickname, trimmedName)
+isNickNameNil: boolean = isnil(nickname)
+typeofDisplayName: string = typeof(displayName)
 println($"Display name is #{displayName}")
-println($"nickname is nil? #{isnil(nickname)}")
-println($"Type of displayName = #{typeof(displayName)}")
+println($"nickname is nil? #{isNickNameNil}")
+println($"Type of displayName = #{typeofDisplayName}")
+
