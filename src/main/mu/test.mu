@@ -54,14 +54,29 @@ else
   println("I expected it to match but it did not")
 end if
 
-print("Enter your name: ")
-name: string = readln()
-println($"Hello, #{name}!")
+name: string = input("Enter your name: ")
+nameUpper: string = upper(name)
+nameLower: string = lower(name)
+nameLength: integer = len(name)
+println($"Hello, #{nameUpper}! Your name has #{nameLength} characters.")
 
 print("Enter an integer: ")
-x: integer = readln()
+x: integer = readint()
 print("Enter another integer: ")
-y: integer = readln()
+y: integer = readint()
+
+print("Enter a floating point number: ")
+measurement: float = readfloat()
+
+print("Is the feature enabled (true/false)? ")
+active: boolean = readbool()
 
 z: integer = x + y
 println($"The sum of #{x} and #{y} is #{z}")
+distance: float = abs(x - y)
+println($"Absolute difference as float: #{distance}")
+power: float = pow(2, 8)
+println($"2 ^ 8 = #{power}")
+measurementSquared: float = pow(measurement, 2)
+println($"Measurement squared = #{measurementSquared}")
+println($"Lowercase name: #{nameLower} and active? #{active}")
