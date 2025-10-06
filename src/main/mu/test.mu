@@ -53,3 +53,6 @@ else
   println("I expected it to match but it did not")
 end if
 
+print("Enter your name: ")
+name: string = readln()
+println($"Hello, #{name}!")

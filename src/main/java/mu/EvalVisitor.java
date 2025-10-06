@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 public class EvalVisitor extends MuBaseVisitor<Value> {
 
     private boolean isDefiningFunction = false; // Flag to switch off visitor execution
@@ -17,6 +16,9 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
 
     // used to compare floating point numbers
     public static final double SMALL_VALUE = 0.00000000001;
+
+    // Keep open with class stdin and don't close it after reading
+    private Scanner stdin = new Scanner(System.in); 
 
     // assignment/id overrides
     @Override
@@ -607,42 +609,6 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         return new Value(left.asBoolean() || right.asBoolean());
     }
 
-    // println override
-    @Override
-    public Value visitPrint_func(MuParser.Print_funcContext ctx) {
-
-        if (isDefiningFunction) {
-            return Value.VOID;
-        }
-
-        Value value = this.visit(ctx.expr());
-        if (ctx.PRINT() == null)
-            System.out.println(value);
-        else
-            System.out.print(value);
-        return value;
-    }
-
-    // readln override
-    @Override
-    public Value visitRead_func(MuParser.Read_funcContext ctx) {
-        if (isDefiningFunction) {
-            return Value.VOID;
-        }
-
-        Scanner stdin = new Scanner(System.in);
-        String input = stdin.nextLine();
-        stdin.close();
-
-        Value value = new Value(input);
-        value.type = Value.TYPE.STRING;
-
-        String id = ctx.ID().getText();
-        symbolTable.put(id, value);
-
-        return value;
-    }
-
     // if override
     @Override
     public Value visitIf_stat(MuParser.If_statContext ctx) {
@@ -684,6 +650,53 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         }
 
         return v;
+    }
+
+    @Override
+    public Value visitFuncCallAtom(MuParser.FuncCallAtomContext ctx) {
+        if (isDefiningFunction) {
+            return Value.VOID;
+        }
+        
+        return visit(ctx.function_call());  // This delegates to visitFunction_call
+    }
+
+    @Override
+    public Value visitFunction_call(MuParser.Function_callContext ctx) {
+        String funcName = ctx.ID().getText();
+        
+        // Handle built-in functions
+        switch(funcName) {
+            case "println":
+                if (ctx.expr_list() == null || ctx.expr_list().expr().size() != 1) {
+                    throw new RuntimeException("println expects exactly 1 argument");
+                }
+                Value printValue = visit(ctx.expr_list().expr(0));
+                System.out.println(printValue);
+                return Value.VOID;
+                
+            case "print":
+                if (ctx.expr_list() == null || ctx.expr_list().expr().size() != 1) {
+                    throw new RuntimeException("print expects exactly 1 argument");
+                }
+                Value printVal = visit(ctx.expr_list().expr(0));
+                System.out.print(printVal);
+                return Value.VOID;
+                
+            case "readln":
+                if (ctx.expr_list() != null && ctx.expr_list().expr().size() > 0) {
+                    throw new RuntimeException("readln expects no arguments");
+                }
+                String input = stdin.nextLine();
+                Value value = new Value(input);
+                value.type = Value.TYPE.STRING;
+                return value;
+                
+            default:
+                // Handle user-defined functions (your existing code)
+                Value function = callUserDefinedFunction(ctx);
+                return function;
+        }
     }
 
     // unless override
@@ -788,8 +801,7 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         return params;
     }
 
-    @Override
-    public Value visitFunction_call(MuParser.Function_callContext ctx) {
+    public Value callUserDefinedFunction(MuParser.Function_callContext ctx) {
         String funcName = ctx.ID().getText();
 
         // Retrieve the function from the symbol table

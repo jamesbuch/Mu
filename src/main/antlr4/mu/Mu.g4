@@ -14,14 +14,10 @@ stat:
 	| if_stat
 	| while_stat
 	| for_stat
-	| print_func
-	| read_func
 	| function_def
 	| expr_stat
 	| unless_expr
 	| OTHER {System.err.println("unknown char: " + $OTHER.text);};
-
-read_func: ID ASSIGN READLN OPAR CPAR;
 
 assignment:
 	ID COLON TYPE ASSIGN expr	# assignmentWithType
@@ -41,8 +37,6 @@ for_stat:
 
 unless_expr: 'do' stat_block 'unless' expr # unlessExpr;
 
-print_func: PRINTLN OPAR expr CPAR | PRINT OPAR expr CPAR;
-
 function_def:
 	'func' ID '(' parameter_list ')' (':' TYPE)? stat_block return_stmt? 'end';
 
@@ -50,7 +44,8 @@ return_stmt: 'return' expr;
 
 parameter_list: (ID ':' TYPE (',' ID ':' TYPE)*)?;
 
-function_call: ID '(' expr_list? ')';
+function_call: ID '(' expr_list? ')'
+	;
 
 expr_list: expr (',' expr)*;
 
@@ -71,11 +66,12 @@ atom:
 	OPAR expr CPAR		# parExpr
 	| arith_atom		# arithAtom
 	| (TRUE | FALSE)	# booleanAtom
+	| function_call		# funcCallAtom // | ID '(' expr_list? ')'  #funcCallAtom
 	| ID				# idAtom
 	| STRING			# stringAtom
 	| DOLLAR STRING		# dollarStringAtom
 	| NIL				# nilAtom
-	| function_call		# funcCallAtom; // | ID '(' expr_list? ')'  #funcCallAtom
+	;
 
 expr_stat: expr;
 
@@ -117,9 +113,6 @@ FOR: 'for';
 TO: 'to';
 END: 'end';
 NEXT: 'next';
-PRINTLN: 'println';
-PRINT: 'print';
-READLN: 'readln';
 
 TYPE: 'integer' | 'float' | 'boolean' | 'string' | 'void';
 
