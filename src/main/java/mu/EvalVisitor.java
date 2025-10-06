@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Function;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +30,38 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
     // reliable way of handling special cases like readln which always returns
     // string but could be cast to integer, float, boolean, or others later if
     // needed.
+
+    private Value readStringInput(String funcName) {
+        String input = stdin.nextLine();
+        Value value = new Value(input);
+        value.setWasFunction(funcName);
+        value.type = Value.TYPE.STRING;
+        return value;
+    }
+
+    private Value readAndParse(String funcName, Function<String, Object> parser, Value.TYPE targetType,
+            String errorMessage) {
+        String rawInput = stdin.nextLine();
+        Object parsedValue;
+        try {
+            parsedValue = parser.apply(rawInput.trim());
+        } catch (RuntimeException ex) {
+            throw new RuntimeException(errorMessage);
+        }
+
+        Value value = new Value(parsedValue);
+        value.setWasFunction(funcName);
+        value.type = targetType;
+        return value;
+    }
+
+    private void ensureArgumentCount(MuParser.Function_callContext ctx, int expected, String functionName) {
+        int count = ctx.expr_list() == null ? 0 : ctx.expr_list().expr().size();
+        if (count != expected) {
+            String message = expected == 1 ? "expects exactly 1 argument" : "expects exactly " + expected + " arguments";
+            throw new RuntimeException(functionName + " " + message);
+        }
+    }
 
     // assignment/id overrides
     @Override
@@ -93,7 +126,7 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         }
 
         // TODO: Check this for accuracy and completeness
-        if (rhsFunctionCall && functionName.equals("readln")) {
+        if (rhsFunctionCall && (functionName.equals("readln") || functionName.equals("input"))) {
             // readln always returns string, so if the variable is not string,
             // we need to attempt a cast
             if (newValueType.equals("integer")) {
@@ -725,30 +758,100 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         // Handle built-in functions
         switch (funcName) {
             case "println":
-                if (ctx.expr_list() == null || ctx.expr_list().expr().size() != 1) {
-                    throw new RuntimeException("println expects exactly 1 argument");
-                }
+                ensureArgumentCount(ctx, 1, "println");
                 Value printValue = visit(ctx.expr_list().expr(0));
                 System.out.println(printValue);
                 return Value.VOID;
 
             case "print":
-                if (ctx.expr_list() == null || ctx.expr_list().expr().size() != 1) {
-                    throw new RuntimeException("print expects exactly 1 argument");
-                }
+                ensureArgumentCount(ctx, 1, "print");
                 Value printVal = visit(ctx.expr_list().expr(0));
                 System.out.print(printVal);
                 return Value.VOID;
 
             case "readln":
-                if (ctx.expr_list() != null && ctx.expr_list().expr().size() > 0) {
-                    throw new RuntimeException("readln expects no arguments");
+                ensureArgumentCount(ctx, 0, "readln");
+                return readStringInput(funcName);
+
+            case "input":
+                ensureArgumentCount(ctx, 1, "input");
+                Value prompt = visit(ctx.expr_list().expr(0));
+                System.out.print(prompt);
+                return readStringInput(funcName);
+
+            case "readint":
+                ensureArgumentCount(ctx, 0, "readint");
+                return readAndParse(funcName, Integer::valueOf, Value.TYPE.INT,
+                        "readint expects an integer value");
+
+            case "readfloat":
+                ensureArgumentCount(ctx, 0, "readfloat");
+                return readAndParse(funcName, Double::valueOf, Value.TYPE.FLOAT,
+                        "readfloat expects a floating point value");
+
+            case "readbool":
+                ensureArgumentCount(ctx, 0, "readbool");
+                return readAndParse(funcName, input -> {
+                    String normalized = input.toLowerCase();
+                    if (normalized.equals("true") || normalized.equals("false")) {
+                        return Boolean.valueOf(normalized);
+                    }
+                    throw new IllegalArgumentException();
+                }, Value.TYPE.BOOLEAN, "readbool expects 'true' or 'false'");
+
+            case "len":
+                ensureArgumentCount(ctx, 1, "len");
+                Value lenValue = visit(ctx.expr_list().expr(0));
+                if (!lenValue.isString()) {
+                    throw new RuntimeException("len expects a string argument");
                 }
-                String input = stdin.nextLine();
-                Value value = new Value(input);
-                value.setWasFunction(funcName);
-                value.type = Value.TYPE.STRING;
-                return value;
+                Value length = new Value(lenValue.asString().length());
+                length.type = Value.TYPE.INT;
+                return length;
+
+            case "upper":
+                ensureArgumentCount(ctx, 1, "upper");
+                Value upperValue = visit(ctx.expr_list().expr(0));
+                if (!upperValue.isString()) {
+                    throw new RuntimeException("upper expects a string argument");
+                }
+                Value upperResult = new Value(upperValue.asString().toUpperCase());
+                upperResult.type = Value.TYPE.STRING;
+                return upperResult;
+
+            case "lower":
+                ensureArgumentCount(ctx, 1, "lower");
+                Value lowerValue = visit(ctx.expr_list().expr(0));
+                if (!lowerValue.isString()) {
+                    throw new RuntimeException("lower expects a string argument");
+                }
+                Value lowerResult = new Value(lowerValue.asString().toLowerCase());
+                lowerResult.type = Value.TYPE.STRING;
+                return lowerResult;
+
+            case "abs":
+                ensureArgumentCount(ctx, 1, "abs");
+                Value absValue = visit(ctx.expr_list().expr(0));
+                if (!absValue.isNumeric()) {
+                    throw new RuntimeException("abs expects a numeric argument");
+                }
+                double absNumber = absValue.isDouble() ? absValue.asDouble() : absValue.asInteger();
+                Value absResult = new Value(Math.abs(absNumber));
+                absResult.type = Value.TYPE.FLOAT;
+                return absResult;
+
+            case "pow":
+                ensureArgumentCount(ctx, 2, "pow");
+                Value baseValue = visit(ctx.expr_list().expr(0));
+                Value exponentValue = visit(ctx.expr_list().expr(1));
+                if (!baseValue.isNumeric() || !exponentValue.isNumeric()) {
+                    throw new RuntimeException("pow expects numeric arguments");
+                }
+                double base = baseValue.isDouble() ? baseValue.asDouble() : baseValue.asInteger();
+                double exponent = exponentValue.isDouble() ? exponentValue.asDouble() : exponentValue.asInteger();
+                Value powResult = new Value(Math.pow(base, exponent));
+                powResult.type = Value.TYPE.FLOAT;
+                return powResult;
 
             // TODO: Add more built-in functions here as needed
             // Check for arguments for function:
