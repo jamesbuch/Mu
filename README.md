@@ -9,7 +9,10 @@ types as well as void.
 Mu has string interpolation with the dollar sign prepended to a string, for
 example `println($"Variable is #{varName}");`
 
-To run [the demo script](https://github.com/bkiers/Mu/blob/master/src/main/mu/test.mu):
+It features some built-in utility functions, like print, println, readln, readint,
+readfloat, readbool, len, abs, pow and others.
+
+To run [the demo script](https://github.com/jamesbuch/Mu/blob/master/src/main/mu/test.mu):
 
 ```
 a: integer = 9
@@ -25,9 +28,8 @@ func myfunction(i: integer, j: integer): void
 
   c = a + b + i * 2 + j * 3
   println($"The #{a} + #{b} + #{i} * 2 + #{j} * 3 = #{c}")
+  println($"Local scope a = #{a}")
 end
-
-println($"Global scope a = #{a}")
 
 foo: string = "foobarbazqux"
 bar: integer = 1
@@ -36,6 +38,8 @@ baz: boolean = true
 println($"a = #{a} foo = #{foo} bar = #{bar} baz = #{baz}")
 
 myfunction(1000, 50000)
+
+println($"Global scope a = #{a}")
 
 j: integer = 0
 
@@ -54,7 +58,7 @@ func f(a: integer, b: integer): integer
   return a + b
 end
 
-rc: integer = f(10, 20)
+rc: integer = f(10, b)
 
 println($"Sum from f() = #{rc}")
 
@@ -66,14 +70,41 @@ if "mail@server.com" =~ "[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}" then
 else
   println("I expected it to match but it did not")
 end if
+
+name: string = input("Enter your name: ")
+nameUpper: string = upper(name)
+nameLower: string = lower(name)
+nameLength: integer = len(name)
+println($"Hello, #{nameUpper}! Your name has #{nameLength} characters.")
+
+print("Enter an integer: ")
+x: integer = readint()
+print("Enter another integer: ")
+y: integer = readint()
+
+print("Enter a floating point number: ")
+measurement: float = readfloat()
+
+print("Is the feature enabled (true/false)? ")
+active: boolean = readbool()
+
+z: integer = x + y
+println($"The sum of #{x} and #{y} is #{z}")
+distance: float = abs(x - y)
+println($"Absolute difference as float: #{distance}")
+power: float = pow(2, 8)
+println($"2 ^ 8 = #{power}")
+measurementSquared: float = pow(measurement, 2)
+println($"Measurement squared = #{measurementSquared}")
+println($"Lowercase name: #{nameLower} and active? #{active}")
 ```
 
 do:
 
 ```
-git clone git://github.com/bkiers/Mu.git
+git clone git://github.com/jamesbuch/Mu.git
 mvn clean install
-mvn -q exec:java
+mvn -q exec:java # Or  java -jar target/mu-0.5.0.jar src/main/mu/test.mu
 ```
 
 which will print the following to your console:
@@ -81,10 +112,11 @@ which will print the following to your console:
 ```
 parsing: src/main/mu/test.mu
 Global scope a = 9
-Global scope a = 9
 a = 9 foo = foobarbazqux bar = 1 baz = true
 This is a function
 The 10 + 50 + 1000 * 2 + 50000 * 3 = 152060
+Local scope a = 10
+Global scope a = 9
 Hello, World j = 1
 Hello, World j = 2
 Hello, World j = 3
@@ -101,10 +133,21 @@ The value of b is 3
 The value of b is 4
 The value of b is 5
 In function f
-Sum from f() = 30
+Sum from f() = 15
 In function f
 Sum from f() = 1100
 The regex matches
+Enter your name: James
+Hello, JAMES! Your name has 5 characters.
+Enter an integer: 55
+Enter another integer: 23
+Enter a floating point number: 3.14159
+Is the feature enabled (true/false)? true
+The sum of 55 and 23 is 78
+Absolute difference as float: 32.0
+2 ^ 8 = 256.0
+Measurement squared = 9.869587728099999
+Lowercase name: james and active? true
 ```
 
 Also see [this stackoverflow Q&A](http://stackoverflow.com/questions/15610183/if-else-statements-in-antlr-using-listeners).
