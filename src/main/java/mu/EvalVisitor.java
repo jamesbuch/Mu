@@ -835,9 +835,14 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
                 if (!absValue.isNumeric()) {
                     throw new RuntimeException("abs expects a numeric argument");
                 }
-                double absNumber = absValue.isDouble() ? absValue.asDouble() : absValue.asInteger();
-                Value absResult = new Value(Math.abs(absNumber));
-                absResult.type = Value.TYPE.FLOAT;
+                if (absValue.isDouble()) {
+                    Value absResult = new Value(Math.abs(absValue.asDouble()));
+                    absResult.type = Value.TYPE.FLOAT;
+                    return absResult;
+                }
+
+                Value absResult = new Value(Math.abs(absValue.asInteger()));
+                absResult.type = Value.TYPE.INT;
                 return absResult;
 
             case "pow":
