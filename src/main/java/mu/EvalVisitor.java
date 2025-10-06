@@ -285,6 +285,9 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
             String varName = m.group(2);
 
             Value v = symbolTable.get(varName);
+            if (v == null) {
+                throw new RuntimeException("no such variable: " + varName);
+            }
             str = str.replace(m.group(1), v.toString());
             m = r.matcher(str);
         }
