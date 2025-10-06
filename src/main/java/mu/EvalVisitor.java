@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 public class EvalVisitor extends MuBaseVisitor<Value> {
 
     private boolean isDefiningFunction = false; // Flag to switch off visitor execution
@@ -20,12 +21,14 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
     // Keep open with class stdin and don't close it after reading
     private Scanner stdin = new Scanner(System.in);
 
-    // We need some helpers to set return types of functions. For user defined functions,
-    // this is handled in visiting the function definition, but for built-in functions
-    // we need to set the return type here when calling the function.
+    // We need some helpers to set return types of functions. For user defined
+    // functions, this is handled in visiting the function definition, but for
+    // built-in
+    // functions we need to set the return type here when calling the function.
     // We should have a map of built-in functions with their return types, with some
-    // reliable way of handling special cases like readln which always returns string
-    // but could be cast to integer, float, boolean, or others later if needed.
+    // reliable way of handling special cases like readln which always returns
+    // string but could be cast to integer, float, boolean, or others later if
+    // needed.
 
     // assignment/id overrides
     @Override
@@ -68,121 +71,69 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         boolean rhsFunctionCall = newValue.wasFunctionCall();
 
         /*
-         * Function name f in assignment with type: integer
-         * Assigning to variable rc the value 30 of type null which claims to be of type integer
-         * assignment with type context was function call: rc
-         * Function call? f(10,20) true
-         * Existing value: null new value: 30
+         * Pull out the function name if the expression was a function call, so we can
+         * give better error messages
          */
         String functionName = ctx.expr().getText();
         int parenIndex = functionName.indexOf('(');
         if (parenIndex != -1) {
             functionName = functionName.substring(0, parenIndex);
-            // Function name f in assignment with type: integer
-            System.out.println("Function name " + functionName + " in assignment with type: " + ctx.TYPE().getText());
         }
 
-        // Assigning to variable rc the value 30 of type null which claims to be of type integer (e.g a = f(10,20))
-        System.out.println("Assigning to variable " + id + " the value " + newValue + " of type " + newValue.type + " which claims to be of type " + ctx.TYPE().getText());
-        
-        // assignment with type context was function call: rc
-        System.out.println("assignment to ID: " + ctx.ID().getText());
+        String newValueType = ctx.TYPE().getText();
 
-        // Function call? f(10,20) true
-        if (rhsFunctionCall) {
-            System.out.println("Function call? " + functionName + " " + rhsFunctionCall);
-        } else {
-            System.out.println("Not a function call, just an expression");
-        }
-
-        // Existing value: null new value: 30
-        System.out.println("Existing value: " + existingValue + " new value: " + newValue);
+        // Existing value: null, we expect null here if variable not yet defined
 
         // Check first for special cases of casts like readln returning something
         // other than a string, this is the only type of cast we allow for now
 
         if (rhsFunctionCall && newValue.type == Value.TYPE.VOID) {
             throw new RuntimeException("Attempting to assign return value of VOID function " +
-                functionName + " to " + id);
+                    functionName + " to " + id);
         }
 
         // TODO: Check this for accuracy and completeness
         if (rhsFunctionCall && functionName.equals("readln")) {
             // readln always returns string, so if the variable is not string,
             // we need to attempt a cast
-            System.out.println(id + " is being assigned the return value of readln()");
-            if (ctx.TYPE().getText().equals("integer")) {
+            if (newValueType.equals("integer")) {
                 try {
                     Integer intValue = Integer.valueOf(newValue.asString());
                     newValue.updateValue(intValue);
                     newValue.type = Value.TYPE.INT;
                 } catch (NumberFormatException nfe) {
-                    throw new RuntimeException("Attempting to assign non-integer value to integer variable");
+                    throw new RuntimeException(
+                            "Attempting to assign non-integer value from readln() to integer variable");
                 }
-            } else if (ctx.TYPE().getText().equals("float")) {
+            } else if (newValueType.equals("float")) {
                 try {
                     Double doubleValue = Double.valueOf(newValue.asString());
                     newValue.updateValue(doubleValue);
                     newValue.type = Value.TYPE.FLOAT;
                 } catch (NumberFormatException nfe) {
-                    throw new RuntimeException("Attempting to assign non-floating point number to float variable");
+                    throw new RuntimeException(
+                            "Attempting to assign non-floating point number from readln() to float variable");
                 }
-            } else if (ctx.TYPE().getText().equals("boolean")) {
+            } else if (newValueType.equals("boolean")) {
                 String boolStr = newValue.asString().toLowerCase();
                 if (boolStr.equals("true") || boolStr.equals("false")) {
                     Boolean boolValue = Boolean.valueOf(boolStr);
                     newValue.updateValue(boolValue);
                     newValue.type = Value.TYPE.BOOLEAN;
                 } else {
-                    throw new RuntimeException("Attempting to assign non-boolean value to boolean variable");
+                    throw new RuntimeException(
+                            "Attempting to assign non-boolean value from readln() to boolean variable");
                 }
-            } else if (ctx.TYPE().getText().equals("string")) {
+            } else if (newValueType.equals("string")) {
                 // No cast needed, already string
                 newValue.type = Value.TYPE.STRING;
             } else {
-                throw new RuntimeException("Unsupported variable type: " + ctx.TYPE().getText());
+                throw new RuntimeException("Unsupported variable type: " + newValueType);
             }
         }
 
-        System.out.println("New value type: " + newValue.type + " new value is integer: " + newValue.isInteger());
-        if (newValue.isInteger()) {
-            newValue.type = Value.TYPE.INT;
-        }
-        if (newValue.isDouble()) {
-            newValue.type = Value.TYPE.FLOAT;
-        }
-        if (newValue.isString()) {
-            newValue.type = Value.TYPE.STRING;
-        }
-        if (newValue.isBoolean()) {
-            newValue.type = Value.TYPE.BOOLEAN;
-        }
         if (newValue.isNil()) {
             newValue.type = Value.TYPE.NIL;
-        }
-
-        if (ctx.TYPE().getText().equals("integer")) {
-            if (newValue.type != Value.TYPE.INT) {
-                throw new RuntimeException("Attempting to assign non-integer to integer variable");
-            }
-        }
-
-        if (ctx.TYPE().getText().equals("boolean")) {
-            if (newValue.type != Value.TYPE.BOOLEAN) {
-                throw new RuntimeException("Attempting to assign non-boolean to boolean variable");
-            }
-        }
-
-        if (ctx.TYPE().getText().equals("float")) {
-            if (newValue.type != Value.TYPE.FLOAT) {
-                throw new RuntimeException("Attempting to assign non-floating point number to float variable");
-            }
-        }
-
-        if (ctx.TYPE().getText().equals("string")) {
-            if (newValue.type != Value.TYPE.STRING) {
-                throw new RuntimeException("Attempting to assign non-string to string variable");
-            }
         }
 
         // Only throw error if variable already exists in the current scope
@@ -758,8 +709,8 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         if (isDefiningFunction) {
             return Value.VOID;
         }
-        
-        return visit(ctx.function_call());  // This delegates to visitFunction_call
+
+        return visit(ctx.function_call()); // This delegates to visitFunction_call
     }
 
     @Override
@@ -768,11 +719,11 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
 
         // Check for built-in functions first
         // If not found, then check for user-defined functions
-        // ID when used in assignment context, like x = func() is 
+        // ID when used in assignment context, like x = func() is
         // assignmentWithType or simpleAssignment
-        
+
         // Handle built-in functions
-        switch(funcName) {
+        switch (funcName) {
             case "println":
                 if (ctx.expr_list() == null || ctx.expr_list().expr().size() != 1) {
                     throw new RuntimeException("println expects exactly 1 argument");
@@ -780,7 +731,7 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
                 Value printValue = visit(ctx.expr_list().expr(0));
                 System.out.println(printValue);
                 return Value.VOID;
-                
+
             case "print":
                 if (ctx.expr_list() == null || ctx.expr_list().expr().size() != 1) {
                     throw new RuntimeException("print expects exactly 1 argument");
@@ -788,33 +739,31 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
                 Value printVal = visit(ctx.expr_list().expr(0));
                 System.out.print(printVal);
                 return Value.VOID;
-                
+
             case "readln":
                 if (ctx.expr_list() != null && ctx.expr_list().expr().size() > 0) {
                     throw new RuntimeException("readln expects no arguments");
                 }
                 String input = stdin.nextLine();
                 Value value = new Value(input);
-                // TODO: We need some way of attempting to cast if the return type is
-                // integer or something else. For now, always return string
                 value.setWasFunction(funcName);
                 value.type = Value.TYPE.STRING;
                 return value;
 
             // TODO: Add more built-in functions here as needed
             // Check for arguments for function:
-            //    if (ctx.expr_list() == null || ctx.expr_list().expr().size() > 0)
+            // if (ctx.expr_list() == null || ctx.expr_list().expr().size() > 0)
             // Check for argument 1, 2, ...
-            //    Value arg1 = visit(ctx.expr_list().expr(0));
-            //    Value arg2 = visit(ctx.expr_list().expr(1));
+            // Value arg1 = visit(ctx.expr_list().expr(0));
+            // Value arg2 = visit(ctx.expr_list().expr(1));
             // Eval arguments:
-            //    Not needed, because already evaluated when argument list seen
-            //    this.visit(ctx.expr_list().expr(0)); ... etc
+            // Not needed, because already evaluated when argument list seen
+            // this.visit(ctx.expr_list().expr(0)); ... etc
             // Return value if needed
-            //    Value returnValue = new Value(...);
-            //    returnValue.type = Value.TYPE....;
-            //    return returnValue;
-                
+            // Value returnValue = new Value(...);
+            // returnValue.type = Value.TYPE....;
+            // return returnValue;
+
             default:
                 // Handle user-defined functions (your existing code)
                 Value function = callUserDefinedFunction(ctx);

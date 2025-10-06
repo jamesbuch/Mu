@@ -14,8 +14,6 @@ func myfunction(i: integer, j: integer): void
   println($"Local scope a = #{a}")
 end
 
-println($"Global scope a = #{a}")
-
 foo: string = "foobarbazqux"
 bar: integer = 1
 baz: boolean = true
@@ -23,6 +21,8 @@ baz: boolean = true
 println($"a = #{a} foo = #{foo} bar = #{bar} baz = #{baz}")
 
 myfunction(1000, 50000)
+
+println($"Global scope a = #{a}")
 
 j: integer = 0
 
@@ -41,7 +41,7 @@ func f(a: integer, b: integer): integer
   return a + b
 end
 
-rc: integer = f(10, 20)
+rc: integer = f(10, b)
 
 println($"Sum from f() = #{rc}")
 
@@ -64,4 +64,4 @@ print("Enter another integer: ")
 y: integer = readln()
 
 z: integer = x + y
-println("The sum of #{x} and #{y} is #{z}")
+println($"The sum of #{x} and #{y} is #{z}")

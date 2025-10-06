@@ -1,4 +1,4 @@
-// Generated from /Users/jamesbuchanan/Development/GitHub/Mu/src/main/antlr4/mu/Mu.g4 by ANTLR 4.13.1
+// Generated from /Volumes/externalssd/Development/Mu/src/main/antlr4/mu/Mu.g4 by ANTLR 4.13.1
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -16,13 +16,13 @@ public class MuBaseListener implements MuListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParse(MuParser.ParseContext ctx) { }
+	@Override public void enterProgram(MuParser.ProgramContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitParse(MuParser.ParseContext ctx) { }
+	@Override public void exitProgram(MuParser.ProgramContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -40,6 +40,18 @@ public class MuBaseListener implements MuListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNonEmptyBlock(MuParser.NonEmptyBlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNonEmptyBlock(MuParser.NonEmptyBlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterStat(MuParser.StatContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -52,25 +64,25 @@ public class MuBaseListener implements MuListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAssignment(MuParser.AssignmentContext ctx) { }
+	@Override public void enterAssignmentWithType(MuParser.AssignmentWithTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAssignment(MuParser.AssignmentContext ctx) { }
+	@Override public void exitAssignmentWithType(MuParser.AssignmentWithTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUnless_stat(MuParser.Unless_statContext ctx) { }
+	@Override public void enterSimpleAssignment(MuParser.SimpleAssignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUnless_stat(MuParser.Unless_statContext ctx) { }
+	@Override public void exitSimpleAssignment(MuParser.SimpleAssignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -83,18 +95,6 @@ public class MuBaseListener implements MuListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitIf_stat(MuParser.If_statContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCondition_block(MuParser.Condition_blockContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCondition_block(MuParser.Condition_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -136,13 +136,73 @@ public class MuBaseListener implements MuListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLog(MuParser.LogContext ctx) { }
+	@Override public void enterUnlessExpr(MuParser.UnlessExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLog(MuParser.LogContext ctx) { }
+	@Override public void exitUnlessExpr(MuParser.UnlessExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunction_def(MuParser.Function_defContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunction_def(MuParser.Function_defContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReturn_stmt(MuParser.Return_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReturn_stmt(MuParser.Return_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParameter_list(MuParser.Parameter_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParameter_list(MuParser.Parameter_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunction_call(MuParser.Function_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunction_call(MuParser.Function_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExpr_list(MuParser.Expr_listContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExpr_list(MuParser.Expr_listContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -203,6 +263,18 @@ public class MuBaseListener implements MuListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOrExpr(MuParser.OrExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRegexExpr(MuParser.RegexExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRegexExpr(MuParser.RegexExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -304,6 +376,18 @@ public class MuBaseListener implements MuListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFuncCallAtom(MuParser.FuncCallAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFuncCallAtom(MuParser.FuncCallAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIdAtom(MuParser.IdAtomContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -352,13 +436,49 @@ public class MuBaseListener implements MuListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNumberAtom(MuParser.NumberAtomContext ctx) { }
+	@Override public void enterExpr_stat(MuParser.Expr_statContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNumberAtom(MuParser.NumberAtomContext ctx) { }
+	@Override public void exitExpr_stat(MuParser.Expr_statContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArith_atom(MuParser.Arith_atomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArith_atom(MuParser.Arith_atomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntegerAtom(MuParser.IntegerAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntegerAtom(MuParser.IntegerAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFloatAtom(MuParser.FloatAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFloatAtom(MuParser.FloatAtomContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
