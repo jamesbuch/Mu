@@ -80,3 +80,23 @@ println($"2 ^ 8 = #{power}")
 measurementSquared: float = pow(measurement, 2)
 println($"Measurement squared = #{measurementSquared}")
 println($"Lowercase name: #{nameLower} and active? #{active}")
+
+paddedName: string = "   " + name + "   "
+trimmedName: string = trim(paddedName)
+println($"Trimmed name '#{trimmedName}' has length #{len(trimmedName)}")
+println($"Name starts with 'J'? #{startswith(trimmedName, "J")}")
+println($"Name ends with 's'? #{endswith(trimmedName, "s")}")
+println($"Name contains 'am'? #{contains(trimmedName, "am")}")
+
+println($"sqrt(81) = #{sqrt(81)}")
+println($"round(measurement) = #{round(measurement)}")
+println($"floor(measurement) = #{floor(measurement)}")
+println($"ceil(measurement) = #{ceil(measurement)}")
+println($"min(x, y) = #{min(x, y)}")
+println($"max(x, measurement) = #{max(x, measurement)}")
+
+nickname: string = nil
+displayName: string = coalesce(nickname, trimmedName)
+println($"Display name is #{displayName}")
+println($"nickname is nil? #{isnil(nickname)}")
+println($"Type of displayName = #{typeof(displayName)}")

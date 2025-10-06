@@ -10,7 +10,9 @@ Mu has string interpolation with the dollar sign prepended to a string, for
 example `println($"Variable is #{varName}");`
 
 It features some built-in utility functions, like print, println, readln, readint,
-readfloat, readbool, len, abs, pow and others.
+readfloat, readbool, len, abs, pow and others. Additional helpers cover common
+string and math operations—trim, startswith, endswith, contains, sqrt, round,
+floor, ceil, min and max—and utility helpers like typeof, isnil and coalesce.
 
 To run [the demo script](https://github.com/jamesbuch/Mu/blob/master/src/main/mu/test.mu):
 

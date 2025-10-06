@@ -63,6 +63,53 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
         }
     }
 
+    private boolean isNilValue(Value value) {
+        return value == null || value.isNil() || value.type == Value.TYPE.NIL;
+    }
+
+    private Value numericFromDouble(double number) {
+        if (number >= Integer.MIN_VALUE && number <= Integer.MAX_VALUE) {
+            double rounded = Math.rint(number);
+            if (Math.abs(number - rounded) < SMALL_VALUE) {
+                Value intValue = new Value((int) Math.round(rounded));
+                intValue.type = Value.TYPE.INT;
+                return intValue;
+            }
+        }
+        Value floatValue = new Value(number);
+        floatValue.type = Value.TYPE.FLOAT;
+        return floatValue;
+    }
+
+    private String describeType(Value value) {
+        if (value == null || value.isNil() || value.type == Value.TYPE.NIL) {
+            return "nil";
+        }
+        if (value.isBoolean()) {
+            return "boolean";
+        }
+        if (value.isInteger()) {
+            return "integer";
+        }
+        if (value.isDouble()) {
+            return "float";
+        }
+        if (value.isString()) {
+            return "string";
+        }
+        if (value.isFunction()) {
+            return "function";
+        }
+        if (value.type != null && value.type != Value.TYPE.VOID) {
+            return value.type.name().toLowerCase();
+        }
+        Object raw = value.getValue();
+        if (raw instanceof Value) {
+            return describeType((Value) raw);
+        }
+        return raw == null ? "nil" : raw.getClass().getSimpleName().toLowerCase();
+    }
+
     // assignment/id overrides
     @Override
     public Value visitSimpleAssignment(MuParser.SimpleAssignmentContext ctx) {
@@ -857,6 +904,141 @@ public class EvalVisitor extends MuBaseVisitor<Value> {
                 Value powResult = new Value(Math.pow(base, exponent));
                 powResult.type = Value.TYPE.FLOAT;
                 return powResult;
+
+            case "trim":
+                ensureArgumentCount(ctx, 1, "trim");
+                Value trimValue = visit(ctx.expr_list().expr(0));
+                if (!trimValue.isString()) {
+                    throw new RuntimeException("trim expects a string argument");
+                }
+                Value trimResult = new Value(trimValue.asString().trim());
+                trimResult.type = Value.TYPE.STRING;
+                return trimResult;
+
+            case "startswith":
+                ensureArgumentCount(ctx, 2, "startswith");
+                Value startsWithTarget = visit(ctx.expr_list().expr(0));
+                Value startsWithPrefix = visit(ctx.expr_list().expr(1));
+                if (!startsWithTarget.isString() || !startsWithPrefix.isString()) {
+                    throw new RuntimeException("startswith expects string arguments");
+                }
+                Value startsWithResult = new Value(startsWithTarget.asString().startsWith(startsWithPrefix.asString()));
+                startsWithResult.type = Value.TYPE.BOOLEAN;
+                return startsWithResult;
+
+            case "endswith":
+                ensureArgumentCount(ctx, 2, "endswith");
+                Value endsWithTarget = visit(ctx.expr_list().expr(0));
+                Value endsWithSuffix = visit(ctx.expr_list().expr(1));
+                if (!endsWithTarget.isString() || !endsWithSuffix.isString()) {
+                    throw new RuntimeException("endswith expects string arguments");
+                }
+                Value endsWithResult = new Value(endsWithTarget.asString().endsWith(endsWithSuffix.asString()));
+                endsWithResult.type = Value.TYPE.BOOLEAN;
+                return endsWithResult;
+
+            case "contains":
+                ensureArgumentCount(ctx, 2, "contains");
+                Value containsTarget = visit(ctx.expr_list().expr(0));
+                Value containsSearch = visit(ctx.expr_list().expr(1));
+                if (!containsTarget.isString() || !containsSearch.isString()) {
+                    throw new RuntimeException("contains expects string arguments");
+                }
+                Value containsResult = new Value(containsTarget.asString().contains(containsSearch.asString()));
+                containsResult.type = Value.TYPE.BOOLEAN;
+                return containsResult;
+
+            case "sqrt":
+                ensureArgumentCount(ctx, 1, "sqrt");
+                Value sqrtValue = visit(ctx.expr_list().expr(0));
+                if (!sqrtValue.isNumeric()) {
+                    throw new RuntimeException("sqrt expects a numeric argument");
+                }
+                double sqrtNumber = sqrtValue.isDouble() ? sqrtValue.asDouble() : sqrtValue.asInteger();
+                if (sqrtNumber < 0) {
+                    throw new RuntimeException("sqrt expects a non-negative number");
+                }
+                Value sqrtResult = new Value(Math.sqrt(sqrtNumber));
+                sqrtResult.type = Value.TYPE.FLOAT;
+                return sqrtResult;
+
+            case "round":
+                ensureArgumentCount(ctx, 1, "round");
+                Value roundValue = visit(ctx.expr_list().expr(0));
+                if (!roundValue.isNumeric()) {
+                    throw new RuntimeException("round expects a numeric argument");
+                }
+                double roundNumber = roundValue.isDouble() ? roundValue.asDouble() : roundValue.asInteger();
+                long rounded = Math.round(roundNumber);
+                if (rounded > Integer.MAX_VALUE || rounded < Integer.MIN_VALUE) {
+                    throw new RuntimeException("round result out of integer range");
+                }
+                Value roundResult = new Value((int) rounded);
+                roundResult.type = Value.TYPE.INT;
+                return roundResult;
+
+            case "floor":
+                ensureArgumentCount(ctx, 1, "floor");
+                Value floorValue = visit(ctx.expr_list().expr(0));
+                if (!floorValue.isNumeric()) {
+                    throw new RuntimeException("floor expects a numeric argument");
+                }
+                double floorNumber = floorValue.isDouble() ? floorValue.asDouble() : floorValue.asInteger();
+                return numericFromDouble(Math.floor(floorNumber));
+
+            case "ceil":
+                ensureArgumentCount(ctx, 1, "ceil");
+                Value ceilValue = visit(ctx.expr_list().expr(0));
+                if (!ceilValue.isNumeric()) {
+                    throw new RuntimeException("ceil expects a numeric argument");
+                }
+                double ceilNumber = ceilValue.isDouble() ? ceilValue.asDouble() : ceilValue.asInteger();
+                return numericFromDouble(Math.ceil(ceilNumber));
+
+            case "min":
+                ensureArgumentCount(ctx, 2, "min");
+                Value minLeft = visit(ctx.expr_list().expr(0));
+                Value minRight = visit(ctx.expr_list().expr(1));
+                if (!minLeft.isNumeric() || !minRight.isNumeric()) {
+                    throw new RuntimeException("min expects numeric arguments");
+                }
+                double minResultValue = Math.min(minLeft.isDouble() ? minLeft.asDouble() : minLeft.asInteger(),
+                        minRight.isDouble() ? minRight.asDouble() : minRight.asInteger());
+                return numericFromDouble(minResultValue);
+
+            case "max":
+                ensureArgumentCount(ctx, 2, "max");
+                Value maxLeft = visit(ctx.expr_list().expr(0));
+                Value maxRight = visit(ctx.expr_list().expr(1));
+                if (!maxLeft.isNumeric() || !maxRight.isNumeric()) {
+                    throw new RuntimeException("max expects numeric arguments");
+                }
+                double maxResultValue = Math.max(maxLeft.isDouble() ? maxLeft.asDouble() : maxLeft.asInteger(),
+                        maxRight.isDouble() ? maxRight.asDouble() : maxRight.asInteger());
+                return numericFromDouble(maxResultValue);
+
+            case "typeof":
+                ensureArgumentCount(ctx, 1, "typeof");
+                Value typeofValue = visit(ctx.expr_list().expr(0));
+                Value typeofResult = new Value(describeType(typeofValue));
+                typeofResult.type = Value.TYPE.STRING;
+                return typeofResult;
+
+            case "isnil":
+                ensureArgumentCount(ctx, 1, "isnil");
+                Value isnilValue = visit(ctx.expr_list().expr(0));
+                Value isnilResult = new Value(isNilValue(isnilValue));
+                isnilResult.type = Value.TYPE.BOOLEAN;
+                return isnilResult;
+
+            case "coalesce":
+                ensureArgumentCount(ctx, 2, "coalesce");
+                Value firstCandidate = visit(ctx.expr_list().expr(0));
+                Value fallbackCandidate = visit(ctx.expr_list().expr(1));
+                if (!isNilValue(firstCandidate)) {
+                    return firstCandidate;
+                }
+                return fallbackCandidate;
 
             // TODO: Add more built-in functions here as needed
             // Check for arguments for function:
