@@ -115,13 +115,19 @@ public class Value {
         this.functionReturnExpr = ret;
         this.returnType = returnType;
         this.type = this.returnType;
+        // XXX: isFunction and wasFunction are different, but both true here?
         this.wasFunction = true;
+        this.isFunction = true;
         this.functionName = func;
     }
 
     public void setWasFunction(String funcName) {
         this.wasFunction = true;
         this.functionName = funcName;
+    }
+
+    public TYPE getReturnType() {
+        return this.returnType;
     }
 
     public boolean wasFunctionCall() {

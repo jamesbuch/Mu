@@ -11,6 +11,7 @@ func myfunction(i: integer, j: integer): void
 
   c = a + b + i * 2 + j * 3
   println($"The #{a} + #{b} + #{i} * 2 + #{j} * 3 = #{c}")
+  println($"Local scope a = #{a}")
 end
 
 println($"Global scope a = #{a}")
@@ -56,3 +57,11 @@ end if
 print("Enter your name: ")
 name: string = readln()
 println($"Hello, #{name}!")
+
+print("Enter an integer: ")
+x: integer = readln()
+print("Enter another integer: ")
+y: integer = readln()
+
+z: integer = x + y
+println("The sum of #{x} and #{y} is #{z}")
